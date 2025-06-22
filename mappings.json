@@ -1,0 +1,4 @@
+{
+	"libdgal-dev": "gdal",
+	"libcgal-dev": "cgal"
+}

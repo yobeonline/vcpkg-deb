@@ -1,0 +1,1 @@
+DPkg::Post-Invoke { "sh /usr/local/bin/vcpkg-deb-sync.sh /opt/vcpkg-deb || true"; };
