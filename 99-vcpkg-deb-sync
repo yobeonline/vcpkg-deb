@@ -1,1 +1,1 @@
-DPkg::Post-Invoke { "sh /usr/local/bin/vcpkg-deb-sync.sh /opt/vcpkg-deb || true"; };
+DPkg::Post-Invoke { "sh /usr/local/bin/vcpkg-deb-sync.sh /etc/vcpkg-deb /opt/vcpkg-deb || true"; };

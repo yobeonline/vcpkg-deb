@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Usage: ./vcpkg-deb-sync.sh <target_dir>
+# Usage: ./vcpkg-deb-sync.sh <conf_dir> <target_dir>
 
 set -eu
 
@@ -69,9 +69,10 @@ EOF
 	echo "Overlay port '$VCPKG_PORT_NAME' synchronized at '$OVERLAY_DIR'"
 }
 
-TARGET_DIR="$1"
-MAIN_MAPPING="mappings.json"
-MAPPINGS_DIR="mappings.d"
+CONF_DIR="$1"
+TARGET_DIR="$2"
+MAIN_MAPPING="$CONF_DIR/mappings.json"
+MAPPINGS_DIR="$CONF_DIR/mappings.d"
 
 # Check if jq is installed
 if ! command -v jq >/dev/null 2>&1; then

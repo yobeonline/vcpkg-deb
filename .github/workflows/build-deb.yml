@@ -1,0 +1,70 @@
+name: Build Debian Package
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-deb:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Install dpkg-dev
+      run: sudo apt-get update && sudo apt-get install -y dpkg-dev
+
+    - name: Prepare Debian package structure
+      run: |
+        mkdir -p package/usr/local/bin
+        mkdir -p package/etc/vcpkg-deb
+        mkdir -p package/etc/apt/apt.conf.d
+
+        # Copy files
+        cp vcpkg-deb-sync.sh package/usr/local/bin/vcpkg-deb-sync.sh
+        cp mappings.json package/etc/vcpkg-deb/mappings.json
+        cp 99-vcpkg-deb-sync package/etc/apt/apt.conf.d/99-vcpkg-sync
+
+        chmod 755 package/usr/local/bin/vcpkg-deb-sync.sh
+
+    - name: Create DEBIAN control file
+      run: |
+        mkdir -p package/DEBIAN
+        cat > package/DEBIAN/control <<EOF
+        Package: vcpkg-deb
+        Version: 0.1.0
+        Section: utils
+        Priority: optional
+        Architecture: all
+        Maintainer: Yohann Bénédic <6747553+yobeonline@users.noreply.github.com>
+        Depends: apt, jq
+        Description: Provides /opt/vcpkg-deb as a vcpkg overlay port repository to enable prioritizing
+ system-installed Debian packages over standard vcpkg ports when available.
+ This helps integrate system packages seamlessly into vcpkg workflows,
+ reducing redundant builds and improving package management consistency.
+        EOF
+
+    - name: Add postinst script
+      run: |
+        cat > package/DEBIAN/postinst <<EOF
+        #!/bin/sh
+        set -e
+
+        sh /usr/local/bin/vcpkg-deb-sync.sh || true
+
+        exit 0
+        EOF
+        chmod 755 package/DEBIAN/postinst
+
+    - name: Build Debian package
+      run: |
+        dpkg-deb --build package
+
+    - name: Upload Debian package artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: vcpkg-deb-sync.deb
+        path: package.deb
+
