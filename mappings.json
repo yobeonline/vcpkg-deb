@@ -1,4 +1,9 @@
 {
-	"libdgal-dev": "gdal",
-	"libcgal-dev": "cgal"
+  "libcgal-dev": "cgal",
+  "libboost-dev": "boost-headers",
+  "libboost-nowide-dev": "boost-nowide",
+  "libboost-filesystem-dev": "boost-filesystem",
+  "libgdal-dev": "libgdal",
+  "libgtest-dev": "gtest",
+  "qtbase5-dev": "qt5-base"
 }
