@@ -6,54 +6,45 @@ set -eu
 
 # Given a port name and a deb name, syncs target_dir with the appropriate port overlay
 update_port() {
-	TARGET_DIR="$1"
-	VCPKG_PORT_NAME="$2"
-	DEB_PACKAGE_NAME="$3"
+  TARGET_DIR="$1"
+  VCPKG_PORT_NAME="$2"
+  DEB_PACKAGE_NAME="$3"
 
-	# Check arguments
-	if [ -z "$TARGET_DIR" ] || [ -z "$VCPKG_PORT_NAME" ] || [ -z "$DEB_PACKAGE_NAME" ]; then
-	    echo "Usage: $0 <root_overlay_dir> <vcpkg_port_name> <deb_package_name>"
-	    return 1
-	fi
+  # Check arguments
+  if [ -z "$TARGET_DIR" ] || [ -z "$VCPKG_PORT_NAME" ] || [ -z "$DEB_PACKAGE_NAME" ]; then
+    echo "Usage: $0 <root_overlay_dir> <vcpkg_port_name> <deb_package_name>"
+    return 1
+  fi
 
-	OVERLAY_DIR="$TARGET_DIR/$VCPKG_PORT_NAME"
+  OVERLAY_DIR="$TARGET_DIR/$VCPKG_PORT_NAME"
 
-	# Check if the Debian package is installed
-	if ! dpkg -s "$DEB_PACKAGE_NAME" >/dev/null 2>&1; then
-	    echo "Debian package '$DEB_PACKAGE_NAME' is not installed."
+  # Check if the Debian package is installed
+  if ! dpkg -s "$DEB_PACKAGE_NAME" >/dev/null 2>&1; then
+    if [ -d "$OVERLAY_DIR" ]; then
+      rm -rf "$OVERLAY_DIR"
+    fi
+    return 0
+  fi
 
-	    if [ -d "$OVERLAY_DIR" ]; then
-		echo "Removing existing overlay port at '$OVERLAY_DIR'"
-		rm -rf "$OVERLAY_DIR"
-	    else
-		echo "No overlay port to remove."
-	    fi
-	    return 0
-	fi
+  # Get Debian package version
+  PACKAGE_VERSION=$(dpkg -s "$DEB_PACKAGE_NAME" | awk -F': ' '/^Version:/ { print $2 }')
+  VERSION=$(echo "$PACKAGE_VERSION" | sed -E 's/^([0-9]+\.[0-9]+(\.[0-9]+)?).*/\1/')
 
-	# Get Debian package version
-	VERSION=$(dpkg -s "$DEB_PACKAGE_NAME" | awk -F': ' '/^Version:/ { print $2 }')
+  # Check if overlay already exists with the same version
+  EXISTING_VERSION_FILE="$OVERLAY_DIR/vcpkg.json"
+  if [ -f "$EXISTING_VERSION_FILE" ]; then
+    CURRENT_VERSION=$(awk -F'"' '/"version":/ { print $4 }' "$EXISTING_VERSION_FILE")
 
-	# Check if overlay already exists with the same version
-	EXISTING_VERSION_FILE="$OVERLAY_DIR/vcpkg.json"
-	if [ -f "$EXISTING_VERSION_FILE" ]; then
-	    CURRENT_VERSION=$(awk -F'"' '/"version-string":/ { print $4 }' "$EXISTING_VERSION_FILE")
+    if [ "$CURRENT_VERSION" = "$VERSION" ]; then
+      return 0
+    fi
+  fi
 
-	    if [ "$CURRENT_VERSION" = "$VERSION" ]; then
-		echo "Overlay port for '$VCPKG_PORT_NAME' is already up to date with version $VERSION"
-		return 0
-	    fi
+  # Create (or recreate) the overlay port directory
+  mkdir -p "$OVERLAY_DIR"
 
-	    echo "Updating existing overlay port: $CURRENT_VERSION → $VERSION"
-	else
-	    echo "Creating new overlay port for '$VCPKG_PORT_NAME' with version $VERSION"
-	fi
-
-	# Create (or recreate) the overlay port directory
-	mkdir -p "$OVERLAY_DIR"
-
-	# Write vcpkg.json
-	cat > "$OVERLAY_DIR/vcpkg.json" <<EOF
+  # Write vcpkg.json
+  cat > "$OVERLAY_DIR/vcpkg.json" <<EOF
 {
   "name": "$VCPKG_PORT_NAME",
   "version": "$VERSION",
@@ -61,12 +52,10 @@ update_port() {
 }
 EOF
 
-	# Write portfile.cmake
-	cat > "$OVERLAY_DIR/portfile.cmake" <<EOF
+  # Write portfile.cmake
+  cat > "$OVERLAY_DIR/portfile.cmake" <<EOF
 set (VCPKG_POLICY_EMPTY_PACKAGE ON)
 EOF
-
-	echo "Overlay port '$VCPKG_PORT_NAME' synchronized at '$OVERLAY_DIR'"
 }
 
 CONF_DIR="$1"
@@ -95,4 +84,3 @@ for json_file in $FILES; do
     update_port "$TARGET_DIR" "$port" "$deb"
   done
 done
-
