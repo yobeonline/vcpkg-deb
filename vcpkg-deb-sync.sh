@@ -54,7 +54,7 @@ EOF
 
   # Write portfile.cmake
   cat > "$OVERLAY_DIR/portfile.cmake" <<EOF
-set (VCPKG_POLICY_EMPTY_PACKAGE ON)
+set (VCPKG_POLICY_EMPTY_PACKAGE enabled)
 EOF
 }
 
