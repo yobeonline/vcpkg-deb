@@ -1,9 +1,13 @@
 {
   "libcgal-dev": "cgal",
-  "libboost-dev": "boost-headers",
+  "libboost-dev": ["boost-headers", "boost-graph", "boost-iterator", "boost-math"],
   "libboost-nowide-dev": "boost-nowide",
   "libboost-filesystem-dev": "boost-filesystem",
+  "libclipper-dev": "polyclipping",
   "libgdal-dev": "gdal",
   "libgtest-dev": "gtest",
-  "qtbase5-dev": "qt5-base"
+  "libproj-dev": "proj",
+  "liblzma-dev": "liblzma",
+  "qtbase5-dev": "qt5-base",
+  "uuid-dev": "libuuid"
 }
