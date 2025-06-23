@@ -78,7 +78,17 @@ done
 
 # Iterate all files to sync overlay ports
 for json_file in $FILES; do
-  jq -r 'to_entries[] | "\(.key) \(.value)"' "$json_file" | while IFS= read -r line; do
+  jq -r '
+    to_entries[] |
+    if (.value | type) == "array" then
+      # if array, then iterate on values
+      .key as $k |
+      .value[] | "\($k) \(.)"
+    else
+      # not an array
+      "\(.key) \(.value)"
+    end
+  ' "$json_file" | while IFS= read -r line; do
     deb=$(echo "$line" | awk '{print $1}')
     port=$(echo "$line" | awk '{print $2}')
     update_port "$TARGET_DIR" "$port" "$deb"
