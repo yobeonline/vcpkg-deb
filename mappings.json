@@ -3,7 +3,7 @@
   "libboost-dev": "boost-headers",
   "libboost-nowide-dev": "boost-nowide",
   "libboost-filesystem-dev": "boost-filesystem",
-  "libgdal-dev": "libgdal",
+  "libgdal-dev": "gdal",
   "libgtest-dev": "gtest",
   "qtbase5-dev": "qt5-base"
 }
