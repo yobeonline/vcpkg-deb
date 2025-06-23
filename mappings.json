@@ -4,10 +4,13 @@
   "libboost-nowide-dev": "boost-nowide",
   "libboost-filesystem-dev": "boost-filesystem",
   "libclipper-dev": "polyclipping",
+  "libcrossguid-dev": "crossguid",
   "libgdal-dev": "gdal",
   "libgtest-dev": "gtest",
-  "libproj-dev": "proj",
+  "libjsoncpp-dev": "jsoncpp",
   "liblzma-dev": "liblzma",
+  "libproj-dev": "proj",
+  "libyaml-cpp-dev": "yaml-cpp",
   "qtbase5-dev": "qt5-base",
   "uuid-dev": "libuuid"
 }
