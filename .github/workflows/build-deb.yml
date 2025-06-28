@@ -45,7 +45,7 @@ jobs:
       run: |
         echo "#!/bin/sh" > package/DEBIAN/postinst
         echo "set -e" >> package/DEBIAN/postinst
-        echo "sh /usr/local/bin/vcpkg-deb-sync.sh || true" >> package/DEBIAN/postinst
+        echo "sh /usr/local/bin/vcpkg-deb-sync.sh /etc/vcpkg-deb /opt/vcpkg-deb || true" >> package/DEBIAN/postinst
         echo "exit 0" >> package/DEBIAN/postinst
         chmod 755 package/DEBIAN/postinst
 
