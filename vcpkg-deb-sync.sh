@@ -4,6 +4,8 @@
 
 set -eu
 
+echo "Updating /opt/vcpkg-deb registry ..."
+
 # Given a port name and a deb name, syncs target_dir with the appropriate port overlay
 update_port() {
   TARGET_DIR="$1"
