@@ -55,7 +55,7 @@ jobs:
         mv package.deb vcpkg-deb_0.1.0_all.deb
 
     - name: Upload Debian package artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: vcpkg-deb
         path: vcpkg-deb_0.1.0_all.deb
