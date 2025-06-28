@@ -32,27 +32,21 @@ jobs:
     - name: Create DEBIAN control file
       run: |
         mkdir -p package/DEBIAN
-        cat > package/DEBIAN/control <<EOF
-Package: vcpkg-deb
-Version: 0.1.0
-Section: utils
-Priority: optional
-Architecture: all
-Maintainer: Yohann Bénédic <6747553+yobeonline@users.noreply.github.com>
-Depends: apt, jq
-Description: Provides /opt/vcpkg-deb as a vcpkg overlay port repository to enable prioritizing system-installed Debian packages over standard vcpkg ports when available. This helps integrate system packages seamlessly into vcpkg workflows, reducing redundant builds and improving package management consistency.
-EOF
+        echo "Package: vcpkg-deb" > package/DEBIAN/control
+        echo "Version: 0.1.0" >> package/DEBIAN/control
+        echo "Section: utils" >> package/DEBIAN/control
+        echo "Priority: optional" >> package/DEBIAN/control
+        echo "Architecture: all" >> package/DEBIAN/control
+        echo "Maintainer: Yohann Bénédic <6747553+yobeonline@users.noreply.github.com>" >> package/DEBIAN/control
+        echo "Depends: apt, jq" >> package/DEBIAN/control
+        echo "Description: Provides /opt/vcpkg-deb as a vcpkg overlay port repository to enable prioritizing system-installed Debian packages over standard vcpkg ports when available. This helps integrate system packages seamlessly into vcpkg workflows, reducing redundant builds and improving package management consistency." >> package/DEBIAN/control
 
     - name: Add postinst script
       run: |
-        cat > package/DEBIAN/postinst <<EOF
-#!/bin/sh
-set -e
-
-sh /usr/local/bin/vcpkg-deb-sync.sh || true
-
-exit 0
-EOF
+        echo "#!/bin/sh" > package/DEBIAN/postinst
+        echo "set -e" >> package/DEBIAN/postinst
+        echo "sh /usr/local/bin/vcpkg-deb-sync.sh || true" >> package/DEBIAN/postinst
+        echo "exit 0" >> package/DEBIAN/postinst
         chmod 755 package/DEBIAN/postinst
 
     - name: Build Debian package
