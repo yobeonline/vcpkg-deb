@@ -33,7 +33,7 @@ jobs:
       run: |
         mkdir -p package/DEBIAN
         echo "Package: vcpkg-deb" > package/DEBIAN/control
-        echo "Version: 0.1.0" >> package/DEBIAN/control
+        echo "Version: 0.1.1" >> package/DEBIAN/control
         echo "Section: utils" >> package/DEBIAN/control
         echo "Priority: optional" >> package/DEBIAN/control
         echo "Architecture: all" >> package/DEBIAN/control
