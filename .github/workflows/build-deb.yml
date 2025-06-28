@@ -40,10 +40,7 @@ Priority: optional
 Architecture: all
 Maintainer: Yohann Bénédic <6747553+yobeonline@users.noreply.github.com>
 Depends: apt, jq
-Description: Provides /opt/vcpkg-deb as a vcpkg overlay port repository to enable prioritizing
- system-installed Debian packages over standard vcpkg ports when available.
- This helps integrate system packages seamlessly into vcpkg workflows,
- reducing redundant builds and improving package management consistency.
+Description: Provides /opt/vcpkg-deb as a vcpkg overlay port repository to enable prioritizing system-installed Debian packages over standard vcpkg ports when available. This helps integrate system packages seamlessly into vcpkg workflows, reducing redundant builds and improving package management consistency.
 EOF
 
     - name: Add postinst script
