@@ -21,7 +21,7 @@ jobs:
 
     - name: Calculate version
       run: |
-        VERSION=$(./calculate-version.sh $TARGET_VERSION")
+        VERSION=$(./calculate-version.sh "$TARGET_VERSION")
         echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"        
       env:
         GITHUB_REF_TYPE: ${{ github.ref_type }}
