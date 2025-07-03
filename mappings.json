@@ -1,6 +1,7 @@
 {
   "libcgal-dev": "cgal",
-  "libboost-dev": ["boost-headers", "boost-iterator", "boost-bind", "boost-asio"],
+  "libboost-dev": ["boost-headers", "boost-iterator", "boost-bind", "boost-asio", "boost-functional", "boost-lockfree"],
+  "libboost-atomic-dev": "boost-atomic",
   "libboost-graph-dev": "boost-graph",
   "libboost-nowide-dev": "boost-nowide",
   "libboost-math-dev": "boost-math",
