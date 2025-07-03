@@ -20,6 +20,7 @@ jobs:
       run: sudo apt-get update && sudo apt-get install -y dpkg-dev
 
     - name: Calculate version
+      id: calc_version
       run: |
         VERSION=$(./calculate-version.sh "$TARGET_VERSION")
         echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"        
@@ -43,7 +44,7 @@ jobs:
       run: |
         mkdir -p package/DEBIAN
         echo "Package: vcpkg-deb" > package/DEBIAN/control
-        echo "Version: ${{ env.VERSION }}" >> package/DEBIAN/control
+        echo "Version: ${{ steps.calc_version.outputs.VERSION }}" >> package/DEBIAN/control
         echo "Section: utils" >> package/DEBIAN/control
         echo "Priority: optional" >> package/DEBIAN/control
         echo "Architecture: all" >> package/DEBIAN/control
@@ -62,11 +63,11 @@ jobs:
     - name: Build Debian package
       run: |
         dpkg-deb --build package
-        mv package.deb vcpkg-deb_${{ env.VERSION }}_all.deb
+        mv package.deb vcpkg-deb_${{ steps.calc_version.outputs.VERSION }}_all.deb
 
     - name: Upload Debian package artifact
       uses: actions/upload-artifact@v4
       with:
-        name: vcpkg-deb_${{ env.VERSION }}_all.deb
-        path: vcpkg-deb_${{ env.VERSION }}_all.deb
+        name: vcpkg-deb_${{ steps.calc_version.outputs.VERSION }}_all.deb
+        path: vcpkg-deb_${{ steps.calc_version.outputs.VERSION }}_all.deb
 
