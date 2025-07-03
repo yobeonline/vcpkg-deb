@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-VERSION="0.1.2"
+VERSION="$1"
 
 # Describe nearest tag in history that matches SemVer pattern
 DESC=$(git describe --tags --match '[0-9]*.[0-9]*.[0-9]*' --abbrev=7 2>/dev/null || true)
@@ -40,9 +40,9 @@ if [ "${GITHUB_REF_TYPE:-}" = "tag" ]; then
         echo "❌ Action was triggered on tag '$TAG', expected '$VERSION'"
         exit 1
     fi
+    SUFFIX=""
 else
     SUFFIX="+${COUNT}-g${SHA}"
 fi
 
-echo "detected version: $VERSION$SUFFIX"
-echo "version=$VERSION$SUFFIX" >> "$GITHUB_ENV"
+echo "$VERSION$SUFFIX"
