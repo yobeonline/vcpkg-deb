@@ -2,7 +2,7 @@ name: Build Debian Package
 
 on:
   push:
-    branches: [main]
+    branches: ["*"]
     tags: ['*[0-9]*.[0-9]*.[0-9]*']
 
 jobs:
@@ -70,4 +70,10 @@ jobs:
       with:
         name: vcpkg-deb_${{ steps.calc_version.outputs.VERSION }}_all.deb
         path: vcpkg-deb_${{ steps.calc_version.outputs.VERSION }}_all.deb
+
+    - name: Add asset to release
+      uses: softprops/action-gh-release@v2
+      if: github.ref_type == 'tag'
+      with:
+        files: vcpkg-deb_${{ steps.calc_version.outputs.VERSION }}_all.deb
 
