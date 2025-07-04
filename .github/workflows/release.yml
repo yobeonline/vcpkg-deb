@@ -16,7 +16,7 @@ jobs:
       - name: Download Debian package artifact
         uses: actions/download-artifact@v4
         with:
-          name: vcpkg-deb
+          name: vcpkg-deb_${{ github.ref_name }}_all.deb
           path: ./vcpkg-deb_${{ github.ref_name }}_all.deb
 
       - name: Publish assets
