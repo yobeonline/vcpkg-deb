@@ -1,7 +1,8 @@
 {
   "libcgal-dev": "cgal",
-  "libboost-dev": ["boost-headers", "boost-container", "boost-iterator", "boost-bind", "boost-asio", "boost-functional", "boost-lockfree", "boost-property-tree"],
+  "libboost-dev": ["boost-headers", "boost-iterator", "boost-bind", "boost-asio", "boost-functional", "boost-lockfree", "boost-property-tree"],
   "libboost-atomic-dev": "boost-atomic",
+  "libboost-container-dev": "boost-container",
   "libboost-graph-dev": "boost-graph",
   "libboost-nowide-dev": "boost-nowide",
   "libboost-math-dev": "boost-math",
