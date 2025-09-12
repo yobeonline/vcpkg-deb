@@ -9,7 +9,7 @@ jobs:
   build-deb:
     runs-on: ubuntu-latest
     env:
-      TARGET_VERSION: "0.1.4"
+      TARGET_VERSION: "0.1.5"
 
     steps:
     - name: Checkout repository
