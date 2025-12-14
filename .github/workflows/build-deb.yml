@@ -9,15 +9,15 @@ jobs:
   build-deb:
     runs-on: ubuntu-latest
     env:
-      TARGET_VERSION: "0.1.5"
+      TARGET_VERSION: "0.2.0"
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
       with:
         fetch-depth: 0
-    - name: Install dpkg-dev
-      run: sudo apt-get update && sudo apt-get install -y dpkg-dev
+    - name: Install dpkg and jq
+      run: sudo apt-get update && sudo apt-get install -y dpkg jq
 
     - name: Calculate version
       id: calc_version
@@ -27,43 +27,17 @@ jobs:
       env:
         GITHUB_REF_TYPE: ${{ github.ref_type }}
 
-    - name: Prepare Debian package structure
+    - name: Configure DEBIAN control file
       run: |
-        mkdir -p package/usr/local/bin
-        mkdir -p package/etc/vcpkg-deb
-        mkdir -p package/etc/apt/apt.conf.d
+        sed -i "s|{{VERSION}}|${{ steps.calc_version.outputs.VERSION }}|g" vcpkg-deb/DEBIAN/control
 
-        # Copy files
-        cp vcpkg-deb-sync.sh package/usr/local/bin/vcpkg-deb-sync.sh
-        cp mappings.json package/etc/vcpkg-deb/mappings.json
-        cp 99-vcpkg-deb-sync package/etc/apt/apt.conf.d/99-vcpkg-sync
-
-        chmod 755 package/usr/local/bin/vcpkg-deb-sync.sh
-
-    - name: Create DEBIAN control file
-      run: |
-        mkdir -p package/DEBIAN
-        echo "Package: vcpkg-deb" > package/DEBIAN/control
-        echo "Version: ${{ steps.calc_version.outputs.VERSION }}" >> package/DEBIAN/control
-        echo "Section: utils" >> package/DEBIAN/control
-        echo "Priority: optional" >> package/DEBIAN/control
-        echo "Architecture: all" >> package/DEBIAN/control
-        echo "Maintainer: Yohann Bénédic <6747553+yobeonline@users.noreply.github.com>" >> package/DEBIAN/control
-        echo "Depends: apt, jq" >> package/DEBIAN/control
-        echo "Description: Provides /opt/vcpkg-deb as a vcpkg overlay port repository to enable prioritizing system-installed Debian packages over standard vcpkg ports when available. This helps integrate system packages seamlessly into vcpkg workflows, reducing redundant builds and improving package management consistency." >> package/DEBIAN/control
-
-    - name: Add postinst script
-      run: |
-        echo "#!/bin/sh" > package/DEBIAN/postinst
-        echo "set -e" >> package/DEBIAN/postinst
-        echo "sh /usr/local/bin/vcpkg-deb-sync.sh /etc/vcpkg-deb /opt/vcpkg-deb || true" >> package/DEBIAN/postinst
-        echo "exit 0" >> package/DEBIAN/postinst
-        chmod 755 package/DEBIAN/postinst
+        echo "Configured control file:"
+        cat vcpkg-deb/DEBIAN/control
 
     - name: Build Debian package
       run: |
-        dpkg-deb --build package
-        mv package.deb vcpkg-deb_${{ steps.calc_version.outputs.VERSION }}_all.deb
+        dpkg-deb -Zgzip --build vcpkg-deb
+        mv vcpkg-deb.deb vcpkg-deb_${{ steps.calc_version.outputs.VERSION }}_all.deb
 
     - name: Upload Debian package artifact
       uses: actions/upload-artifact@v4

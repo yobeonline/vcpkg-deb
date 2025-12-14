@@ -1,0 +1,66 @@
+{
+  "libcgal-dev": {
+    "vcpkg-port": "cgal",
+    "min-version": "5.2"
+  },
+  "libboost-dev": {
+    "vcpkg-port": ["boost-headers", "boost-algorithm", "boost-iterator", "boost-bind", "boost-asio", "boost-functional", "boost-lockfree", "boost-property-tree"],
+    "min-version": "1.74"
+  },
+  "libboost-atomic-dev": {
+    "vcpkg-port": "boost-atomic",
+    "min-version": "1.74"
+  },
+  "libboost-container-dev": {
+    "vcpkg-port": "boost-container",
+    "min-version": "1.74"
+  },
+  "libboost-graph-dev": {
+    "vcpkg-port": "boost-graph",
+    "min-version": "1.74"
+  },
+  "libboost-nowide-dev": {
+    "vcpkg-port": "boost-nowide",
+    "min-version": "1.74"
+  },
+  "libboost-math-dev": {
+    "vcpkg-port": "boost-math",
+    "min-version": "1.74"
+  },
+  "libboost-filesystem-dev": {
+    "vcpkg-port": "boost-filesystem",
+    "min-version": "1.74"
+  },
+  "libboost-thread-dev": {
+    "vcpkg-port": "boost-thread",
+    "min-version": "1.74"
+  },
+  "libgdal-dev": {
+    "vcpkg-port": "gdal",
+    "min-version": "3.6"
+  },
+  "libgtest-dev": {
+    "vcpkg-port": "gtest",
+    "min-version": "1.10"
+  },
+  "libjsoncpp-dev": {
+    "vcpkg-port": "jsoncpp",
+    "min-version": "1.9"
+  },
+  "liblzma-dev": {
+    "vcpkg-port": "liblzma",
+    "min-version": "5.2"
+  },
+  "libproj-dev": {
+    "vcpkg-port": "proj",
+    "min-version": "9.1"
+  },
+  "libyaml-cpp-dev": {
+    "vcpkg-port": "yaml-cpp",
+    "min-version": "0.6"
+  },
+  "qtbase5-dev": {
+    "vcpkg-port": "qt5-base",
+    "min-version": "5.15.8"
+  }
+}
