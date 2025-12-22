@@ -1,0 +1,219 @@
+#!/bin/sh
+#
+# Usage:
+#   vcpkg-deb-sync.sh <conf_dir> <target_dir> [deb-package...]
+#
+
+set -e
+
+###############################################################################
+# System adapters (override via environment for unit tests)
+###############################################################################
+
+: "${JQ:=jq}"
+: "${DPKG_QUERY:=dpkg-query}"
+: "${DPKG_COMPARE:=dpkg --compare-versions}"
+: "${MKDIR:=mkdir -p}"
+: "${RM:=rm -rf}"
+
+###############################################################################
+# Helper functions (pure / testable)
+###############################################################################
+
+get_installed_version() {
+  $DPKG_QUERY -W -f='${Version}' "$1" 2>/dev/null
+}
+
+strip_debian_revision() {
+  # Removes epoch and debian revision:
+  #   1:1.74.0-2ubuntu1 -> 1.74.0
+  echo "$1" | sed -E 's/^[0-9]*://; s/-.*$//'
+}
+
+compare_versions_ge() {
+  # $1 >= $2
+  $DPKG_COMPARE "$1" ge "$2"
+}
+
+###############################################################################
+# Pure decision logic (unit-testable)
+###############################################################################
+#
+# decide_overlay_action <installed_version> <min_version>
+# stdout: enable | disable
+#
+decide_overlay_action() {
+  INSTALLED="$1"
+  MIN_VERSION="$2"
+
+  if [ -z "$INSTALLED" ]; then
+    echo disable
+    return
+  fi
+
+  if compare_versions_ge "$INSTALLED" "$MIN_VERSION"; then
+    echo enable
+  else
+    echo disable
+  fi
+}
+
+###############################################################################
+# Overlay mutators (side effects only)
+###############################################################################
+
+enable_overlay() {
+  VCPKG_PORT="$1"
+  DEB_PACKAGE="$2"
+  VERSION="$3"
+  TARGET_DIR="$4"
+
+  OVERLAY_DIR="$TARGET_DIR/$VCPKG_PORT"
+
+  echo "Updating overlay for $VCPKG_PORT from $DEB_PACKAGE ($VERSION)"
+
+  $MKDIR "$OVERLAY_DIR"
+
+  cat > "$OVERLAY_DIR/vcpkg.json" <<EOF
+{
+  "name": "$VCPKG_PORT",
+  "version": "$VERSION",
+  "description": "Overlay port for $VCPKG_PORT backed by Debian package $DEB_PACKAGE"
+}
+EOF
+
+  cat > "$OVERLAY_DIR/portfile.cmake" <<EOF
+set(VCPKG_POLICY_EMPTY_PACKAGE enabled)
+EOF
+}
+
+disable_overlay() {
+  VCPKG_PORT="$1"
+  TARGET_DIR="$2"
+
+  OVERLAY_DIR="$TARGET_DIR/$VCPKG_PORT"
+
+  if [ -d "$OVERLAY_DIR" ]; then
+    echo "Removing overlay for $VCPKG_PORT"
+    $RM "$OVERLAY_DIR"
+  fi
+}
+
+###############################################################################
+# Orchestration helpers
+###############################################################################
+
+process_mapping() {
+  DEB="$1"
+  PORT="$2"
+  MIN_VERSION="$3"
+  TARGET_DIR="$4"
+
+  INSTALLED_VERSION=$(get_installed_version "$DEB" || true)
+  ACTION=$(decide_overlay_action "$INSTALLED_VERSION" "$MIN_VERSION")
+
+  case "$ACTION" in
+    enable)
+      VERSION=$(strip_debian_revision "$INSTALLED_VERSION")
+      enable_overlay "$PORT" "$DEB" "$VERSION" "$TARGET_DIR"
+      ;;
+    disable)
+      disable_overlay "$PORT" "$TARGET_DIR"
+      ;;
+  esac
+}
+
+###############################################################################
+# Main entry point
+###############################################################################
+
+main() {
+  CONF_DIR="$1"
+  TARGET_DIR="$2"
+
+  if [ -z "$CONF_DIR" ] || [ -z "$TARGET_DIR" ]; then
+    echo "Usage: vcpkg-deb-sync.sh <conf_dir> <target_dir> [deb-package...]" >&2
+    exit 1
+  fi
+
+  if [ ! -d "$CONF_DIR" ]; then
+    echo "Error: configuration directory does not exist: $CONF_DIR" >&2
+    exit 1
+  fi
+  
+  MAIN_MAPPING="$CONF_DIR/mappings.json"
+  MAPPINGS_DIR="$CONF_DIR/mappings.d"
+
+  if [ ! -d "$TARGET_DIR" ]; then
+    echo "Creating target directory: $TARGET_DIR"
+    $MKDIR "$TARGET_DIR"
+  fi
+  
+  if ! command -v "$JQ" >/dev/null 2>&1; then
+    echo "Error: jq is required but not installed." >&2
+    exit 1
+  fi
+
+  shift 2 || true
+
+  # Store remaining args as space-separated list (assumes no spaces in package names)
+  TRIGGERED_DEBS="$@"
+
+  echo "Updating $TARGET_DIR vcpkg registry ..."
+
+  FILES=""
+
+  # mappings.json is optional
+  if [ -f "$MAIN_MAPPING" ]; then
+    FILES="$MAIN_MAPPING"
+  fi
+
+  # mappings.d/*.json are optional
+  if [ -d "$MAPPINGS_DIR" ]; then
+    for f in "$MAPPINGS_DIR"/*.json; do
+      [ -e "$f" ] || continue
+      FILES="$FILES $f"
+    done
+  fi
+
+  # Error if no mapping JSON files were found at all
+  if [ -z "$FILES" ]; then
+    echo "Error: no mapping JSON files found (missing mappings.json and mappings.d/*.json)" >&2
+    exit 1
+  fi
+
+  MAPPINGS_JSON=$(
+    $JQ -s 'reduce .[] as $m ({}; . * $m)' $FILES
+  )
+
+  if [ -n "$TRIGGERED_DEBS" ]; then
+    DEBS_TO_PROCESS="$TRIGGERED_DEBS"
+  else
+    DEBS_TO_PROCESS=$(printf '%s\n' "$MAPPINGS_JSON" | $JQ -r 'keys[]')
+  fi
+
+  for deb in $DEBS_TO_PROCESS; do
+    printf '%s\n' "$MAPPINGS_JSON" |
+      $JQ -r --arg deb "$deb" '
+        .[$deb] // empty |
+        .["vcpkg-port"] as $ports |
+        .["min-version"] as $min |
+        ($ports | if type=="array" then .[] else . end) |
+        "\(.):\($min)"
+      ' |
+      while IFS=: read -r port min_version; do
+        process_mapping "$deb" "$port" "$min_version" "$TARGET_DIR"
+      done
+  done
+
+  echo "vcpkg-deb registry update at ${TARGET_DIR} complete."
+}
+
+###############################################################################
+# Guard: allow sourcing without execution (for unit tests)
+###############################################################################
+
+if [ "${VCPKG_DEB_SYNC_LIB_ONLY:-0}" -ne 1 ]; then
+  main "$@"
+fi
+
