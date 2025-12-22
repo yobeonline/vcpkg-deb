@@ -1,4 +1,8 @@
 {
+  "doctest-dev": {
+    "vcpkg-port": "doctest",
+    "min-version": "2.4"
+  },
   "libcgal-dev": {
     "vcpkg-port": "cgal",
     "min-version": "5.2"
