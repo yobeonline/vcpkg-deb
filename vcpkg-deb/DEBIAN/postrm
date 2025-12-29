@@ -1,0 +1,19 @@
+#!/bin/sh
+set -e
+
+case "$1" in
+  remove)
+    rmdir --ignore-fail-on-non-empty /usr/share/vcpkg-deb 2>/dev/null || true
+    ;;
+  purge)
+    rm -rf /usr/share/vcpkg-deb || {
+	  echo "Warning: failed to remove /usr/share/vcpkg-deb" >&2
+	  true
+	}
+    ;;
+  *)
+    # No action needed for other cases
+    ;;
+esac
+
+exit 0
