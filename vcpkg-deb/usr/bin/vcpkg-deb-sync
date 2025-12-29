@@ -26,8 +26,8 @@ get_installed_version() {
 
 strip_debian_revision() {
   # Removes epoch and debian revision:
-  #   1:1.74.0-2ubuntu1 -> 1.74.0
-  echo "$1" | sed -E 's/^[0-9]*://; s/-.*$//'
+  #   1:1.74.0+dfsg-2ubuntu1 -> 1.74.0
+  echo "$1" | sed -E 's/^[0-9]*://; s/-.*$//; s/\+dfsg//'
 }
 
 compare_versions_ge() {
