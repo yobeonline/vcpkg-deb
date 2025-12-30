@@ -63,6 +63,10 @@
     "vcpkg-port": "yaml-cpp",
     "min-version": "0.6"
   },
+  "libtbb-dev": {
+    "vcpkg-port": "tbb",
+    "min-version": "2020.3"
+  },
   "qtbase5-dev": {
     "vcpkg-port": "qt5-base",
     "min-version": "5.15.8"
