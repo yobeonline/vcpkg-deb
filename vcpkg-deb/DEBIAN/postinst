@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-/usr/bin/vcpkg-deb-sync /etc/vcpkg-deb /usr/share/vcpkg-deb || {
+/usr/bin/vcpkg-deb-sync /etc/vcpkg-deb /var/lib/vcpkg-deb || {
   echo "Warning: vcpkg-deb-sync failed" >&2
   true
 }

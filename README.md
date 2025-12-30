@@ -2,7 +2,7 @@
 
 `vcpkg-deb` provides **`vcpkg-deb-sync`**, a lightweight integration tool that makes Debian system packages available as overlay ports in [vcpkg](https://github.com/microsoft/vcpkg).
 
-To use the system-provided overlay ports, configure vcpkg to use the overlay directory at `/usr/share/vcpkg-deb` (see the official [overlay ports documentation](https://learn.microsoft.com/en-us/vcpkg/concepts/overlay-ports)).
+To use the system-provided overlay ports, configure vcpkg to use the overlay directory at `/var/lib/vcpkg-deb` (see the official [overlay ports documentation](https://learn.microsoft.com/en-us/vcpkg/concepts/overlay-ports)).
 
 Alternatively, `vcpkg-deb-sync` can be used directly to generate and maintain your own overlay ports directories.
 
@@ -12,7 +12,7 @@ Alternatively, `vcpkg-deb-sync` can be used directly to generate and maintain yo
 
 The system-wide overlay ports directory is located at:
 ```text
-/usr/share/vcpkg-deb
+/var/lib/vcpkg-deb
 ```
 It is automatically updated whenever `/usr/include` is modified by `dpkg`.
 
